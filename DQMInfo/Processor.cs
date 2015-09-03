@@ -44,6 +44,7 @@ namespace DQMInfo
 						MonsterMenu();
 						break;
 					case "2":
+						SkillMenu();
 						break;
 					case "0":
 						Completed = true;
@@ -128,6 +129,33 @@ namespace DQMInfo
 						break;
 				}
 			}
+		}
+
+		public void SkillMenu()
+		{
+			System.Console.WriteLine();
+			System.Console.WriteLine("Type the name of the skill to search for: ");
+			string SkillName = System.Console.ReadLine();
+			IQueryable<Skill> BaseQuery = SkillList.AsQueryable().Where(x => x.Name.ToUpper().Contains(SkillName.ToUpper()));
+			if(!BaseQuery.Any())
+			{
+				System.Console.WriteLine("Skill \"{0}\" not found. ", SkillName);
+				return;
+			}
+			else
+			{
+				if (BaseQuery.ToList().Count > 1)
+				{
+					foreach (String thisLine in Skill.OutputMultiple(BaseQuery.ToList()))
+					{
+						System.Console.WriteLine(thisLine);
+					}
+				}
+				else
+					BaseQuery.Single().Output();
+			}
+
+			System.Console.WriteLine();
 		}
 	}
 }
