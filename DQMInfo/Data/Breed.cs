@@ -4,9 +4,17 @@ using System.Linq;
 
 namespace DQMInfo.Data
 {
-	public class Breed
+	public class Breed : IData
 	{
 		public Monster Result;
+
+		public String SearchName 
+		{ 
+			get 
+			{
+				return Result.Name ?? "NULL";
+			}
+		}
 
 		public IBreedable Parent1;
 		public IBreedable Parent2;
@@ -85,12 +93,22 @@ namespace DQMInfo.Data
 			return ret;
 		}
 
-		public String Output()
+		public List<String> OutputSingle()
 		{
-			return String.Format("{0,9} = {1, 12} + {2, 12}", this.Result.Name, Parent1.BreedName, Parent2.BreedName);
+			List<String> ret = new List<String>();
+			ret.Add(String.Format("{0,9} = {1, 12} + {2, 12}", this.Result.Name, Parent1.BreedName, Parent2.BreedName));
+			return ret;
 		}
 
+		public String OutputMultipleHeader()
+		{
+			return String.Format("{0,9} {1,12} {2,12}", "Result", "Parent 1", "Parent 2");
+		}
 
+		public String OutputMultipleLine()
+		{
+			return String.Format("{0,9} {1,12} {2,12}", this.Result.Name, Parent1.BreedName, Parent2.BreedName);
+		}
 	}
 }
 

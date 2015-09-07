@@ -33,112 +33,80 @@ namespace DQMInfo.BreedTree
 			this.Cost = result.Cost;
 		}
 
-		public static BreedNode BreedNodeInner(IBreedable inputResult, List<Breed> BreedList, List<Monster> UsedMonsters, List<BreedNode> PartialPaths)
+		public BreedNode(IBreedable inThisBreed, BreedNode inParent1, BreedNode inParent2)
 		{
-			if(PartialPaths.AsQueryable().Where(x => x.thisBreed == inputResult).Any())
-			{
+			thisBreed = inThisBreed;
+			Parent1 = inParent1;
+			Parent2 = inParent2;
+			Cost = (this.Parent1.Cost == -1 || this.Parent2.Cost == -1) ? -1 : this.Parent1.Cost + this.Parent2.Cost;
+		}
+
+		public BreedNode(IBreedable inThisBreed, BreedNode inParent1, BreedNode inParent2, int inCost)
+		{
+			thisBreed = inThisBreed;
+			Parent1 = inParent1;
+			Parent2 = inParent2;
+			Cost = inCost;
+		}
+
+		private static BreedNode BreedNodeInner(IBreedable inputResult, List<Breed> BreedList, List<Monster> UsedMonsters, List<BreedNode> PartialPaths)
+		{
+			if(PartialPaths.AsQueryable().Where(x => x.thisBreed == inputResult).Any()) //Check if the current result has already been calculated, and return the already calculated optimal path if it has
 				return PartialPaths.AsQueryable().Where(x => x.thisBreed == inputResult && x.Cost > 0).OrderBy(x => x.Cost).First();
-			}
 
-			BreedNode thisBreedNode = new BreedNode();
-			thisBreedNode.thisBreed = inputResult;
-
-			if(inputResult.isFinal || inputResult.GetType().Name == "Family")
-			{
-				thisBreedNode.Parent1 = null;
-				thisBreedNode.Parent2 = null;
-				thisBreedNode.Cost = inputResult.BreedName == "Any Boss" ? 10 : 1;
-				return thisBreedNode;
-			}
-			else
-			{
-				List<Breed> PotentialBreeds = BreedList.AsQueryable().Where(x => x.Result == inputResult).ToList();
-
-				if(PotentialBreeds.Count == 0)
-				{
-					thisBreedNode.Parent1 = null;
-					thisBreedNode.Parent2 = null;
-					thisBreedNode.Cost = 10;
-					UsedMonsters.Remove((Monster)inputResult);
-					return thisBreedNode;
-				}
-
-				//check for circular breeding dependency
-				PotentialBreeds.RemoveAll(x => UsedMonsters.Take(UsedMonsters.Count - 1).Contains(x.Parent1) || UsedMonsters.Take(UsedMonsters.Count - 1).Contains(x.Parent2));
-				if(PotentialBreeds.Count == 0)
-				{
-					thisBreedNode.Parent1 = null;
-					thisBreedNode.Parent2 = null;
-
-					//abandon ship
-					thisBreedNode.Cost = -1;
-					UsedMonsters.Remove((Monster)inputResult);
-					return thisBreedNode;
-				}
-
-				//Add current monster to Used Monsters list.
-				UsedMonsters.Add((Monster)inputResult);
+			if(inputResult.isFinal) //If the current result is a "Family" type, make this node a leaf with a cost of 1 (10 if Family is Boss) and return it.
+				return new BreedNode(inputResult, null, null, inputResult.BreedName == "Any Boss" ? 10 : 1);
 				
-				if(PotentialBreeds.Count == 1)
-				{
-					thisBreedNode.Parent1 = BreedNodeInner(PotentialBreeds[0].Parent1, BreedList, UsedMonsters, PartialPaths);
-					thisBreedNode.Parent2 = BreedNodeInner(PotentialBreeds[0].Parent2, BreedList, UsedMonsters, PartialPaths);
-					if (thisBreedNode.Parent1.Cost == -1 || thisBreedNode.Parent2.Cost == -1)
-						thisBreedNode.Cost = -1;
-					else
-						thisBreedNode.Cost = thisBreedNode.Parent1.Cost + thisBreedNode.Parent2.Cost;
+			List<Breed> PotentialBreeds = BreedList.AsQueryable().Where(x => x.Result == inputResult).ToList(); //Get the list of possible breed combinations that result in the requested monster
 
-					UsedMonsters.Remove((Monster)inputResult);
-					return thisBreedNode;
-				}
-
-				else
-				{
-					List<BreedNode> PotentialReturn = new List<BreedNode>();
+			if(PotentialBreeds.Count == 0) //If this monster has no breeds (e.g. Slime, BigRoost, CopyCat, Darck), make this node a leaf with a cost of 10 and return it.
+				return new BreedNode(inputResult, null, null, 10);
 
 
-					foreach(Breed thisBreed in PotentialBreeds)
-					{
-						BreedNode tempAdd = new BreedNode();
+			PotentialBreeds.RemoveAll(x => UsedMonsters.Take(UsedMonsters.Count - 1).Contains(x.Parent1) || UsedMonsters.Take(UsedMonsters.Count - 1).Contains(x.Parent2)); 
+			//Remove all breeding combinations that require a monster already used higher up in the tree (to avoid circular dependencies)
+				
+			if(PotentialBreeds.Count == 0) //If the above removal fails, then this breed choice should not be used. Return a leaf with a cost of -1 (signifies do not use).
+				return new BreedNode(inputResult, null, null, -1);
+				
+			UsedMonsters.Add((Monster)inputResult); //Add current monster to the Used Monsters list.
+			if(PotentialBreeds.Count == 1) //If there is only one possible breed combination for this monster...
+			{
+				BreedNode thisBreedNode = new BreedNode //Calculate the optimal breed tree for each parent.
+					(
+						inputResult,
+						BreedNodeInner(PotentialBreeds[0].Parent1, BreedList, UsedMonsters, PartialPaths),
+						BreedNodeInner(PotentialBreeds[0].Parent2, BreedList, UsedMonsters, PartialPaths)
+				    );
+						
+				UsedMonsters.Remove((Monster)inputResult); //Remove the current monster from the used monsters list
 
-						tempAdd.thisBreed = inputResult;
-						tempAdd.Parent1 = BreedNodeInner(thisBreed.Parent1, BreedList, UsedMonsters, PartialPaths);
-						tempAdd.Parent2 = BreedNodeInner(thisBreed.Parent2, BreedList, UsedMonsters, PartialPaths);
-						if (tempAdd.Parent1.Cost == -1 || tempAdd.Parent2.Cost == -1)
-							tempAdd.Cost = -1;
-						else
-							tempAdd.Cost = tempAdd.Parent1.Cost + tempAdd.Parent2.Cost;
+				if(thisBreedNode.Cost > 0) PartialPaths.Add(thisBreedNode); //Add the calculated optimal path for this monster to the partial paths list if it has a cost > 0
 
-						if(tempAdd.Cost > 0) PotentialReturn.Add(tempAdd);
-					}
-
-					if(PotentialReturn.Count == 0)
-					{
-						thisBreedNode.Parent1 = null;
-						thisBreedNode.Parent2 = null;
-
-						//abandon ship
-						thisBreedNode.Cost = -1;
-						UsedMonsters.Remove((Monster)inputResult);
-						return thisBreedNode;
-					}
-
-					thisBreedNode = PotentialReturn.OrderBy(x => x.Cost).First();
-
-					foreach(BreedNode RemoveFromUsedList in PotentialReturn)
-					{
-						if(RemoveFromUsedList.thisBreed.GetType().Name == "Monster")
-						{
-							UsedMonsters.Remove((Monster)RemoveFromUsedList.thisBreed);
-						}
-					}
-
-					UsedMonsters.Remove((Monster)inputResult);
-
-					if(thisBreedNode.Cost > 0) PartialPaths.Add(thisBreedNode);
-					return thisBreedNode;
-				}
+				return thisBreedNode; //Return the node
 			}
+				
+			List<BreedNode> PotentialReturn = new List<BreedNode>();
+			foreach(Breed thisBreed in PotentialBreeds) //For each potential breed resulting in the requested result, generate a breed node (using the same logic as above). Skip any nodes with a cost of -1.
+			{
+				BreedNode tempAdd = new BreedNode
+					(
+						inputResult,
+						BreedNodeInner(thisBreed.Parent1, BreedList, UsedMonsters, PartialPaths),
+						BreedNodeInner(thisBreed.Parent2, BreedList, UsedMonsters, PartialPaths)
+					);
+
+				if(tempAdd.Cost > 0) PotentialReturn.Add(tempAdd);
+			}
+				
+			if(PotentialReturn.Count == 0) //If there are no nodes created above (all have a cost of -1), then return this node as a leaf with a cost of -1.
+				return new BreedNode(inputResult, null, null, -1);
+				
+			BreedNode result = PotentialReturn.OrderBy(x => x.Cost).First(); //Sort the list of nodes created above by cost and take the node with the lowest cost.
+			UsedMonsters.Remove((Monster)inputResult); //Remove the current monster from the used monsters list
+			if(result.Cost > 0) PartialPaths.Add(result); //Add the calculated optimal path for this monster to the partial paths list if it has a cost > 0
+			return result; //Return the node
+
 		}
 
 		public String[] OutputTree()
@@ -150,36 +118,25 @@ namespace DQMInfo.BreedTree
 			if(Parent1 == null && Parent2 == null)
 			{
 				if (!thisBreed.isFinal)
-					OutputList.Add(String.Format("└Find in wild"));
+					OutputList.Add(String.Format("└──Find in wild"));
 				return OutputList.ToArray();
 			}
 
 			String[] Parent1Output = Parent1.OutputTree();
-			OutputList.Add(String.Format("├{0}", Parent1Output[0]));
+			OutputList.Add(String.Format("├──{0}", Parent1Output[0]));
 			for(int i = 1; i < Parent1Output.Count(); i++)
 			{
-					OutputList.Add(String.Format("│{0}", Parent1Output[i]));
+					OutputList.Add(String.Format("│  {0}", Parent1Output[i]));
 			}
 
 			String[] Parent2Output = Parent2.OutputTree();
-			OutputList.Add(String.Format("└{0}", Parent2Output[0]));
+			OutputList.Add(String.Format("└──{0}", Parent2Output[0]));
 			for(int i = 1; i < Parent2Output.Count(); i++)
 			{
-				OutputList.Add(String.Format(" {0}", Parent2Output[i]));
+				OutputList.Add(String.Format("   {0}", Parent2Output[i]));
 			}
 
 			return OutputList.ToArray();
-		}
-
-		public List<IBreedable> ReferencesSuck(List<IBreedable> input)
-		{
-			List<IBreedable> ret = new List<IBreedable>();
-			foreach(IBreedable thisBreed in input)
-			{
-				ret.Add(thisBreed);
-			}
-
-			return ret;
 		}
 	}
 }

@@ -3,9 +3,12 @@ using System.Collections.Generic;
 
 namespace DQMInfo.Data
 {
-	public class Family : IOutputable, IBreedable
+	public class Family : IData, IBreedable
 	{
 		public String Name;
+
+		public String SearchName { get { return this.Name; }}
+
 		public String BreedName { get{ return String.Format("Any {0}", this.Name); } }
 
 		public bool isFinal { get { return true; } }
@@ -41,10 +44,21 @@ namespace DQMInfo.Data
 			return ret;
 		}
 
-		public void Output()
+		public List<String> OutputSingle()
 		{
-			System.Console.WriteLine("Family: {0}", this.Name);
-			System.Console.ReadKey();
+			List<String> ret = new List<String>();
+			ret.Add(String.Format("Family: {0}", this.Name));
+			return ret;
+		}
+
+		public String OutputMultipleHeader()
+		{
+			return String.Format("{0,8}", "Family");
+		}
+
+		public String OutputMultipleLine()
+		{
+			return String.Format("{0,8}", this.Name);
 		}
 	}
 }

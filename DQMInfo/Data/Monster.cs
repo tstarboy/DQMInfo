@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using DQMInfo.Output;
+
 namespace DQMInfo.Data
 {
-	public class Monster : IOutputable, IBreedable
+	public class Monster : IData, IBreedable
 	{
 		public Family MemberOf;
 		public String Name;
+
+		public String SearchName { get { return this.Name; } }
 		public String BreedName { get { return this.Name; } }
+
 		public int MaxLV;
 		public int GrowthRate;
 		public int BaseHP;
@@ -90,23 +95,64 @@ namespace DQMInfo.Data
 			return ret;
 		}
 
-		public void Output()
+		public List<String> OutputSingle()
 		{
-			System.Console.WriteLine("Monster: {0}", this.Name);
-			System.Console.WriteLine("Family: {0}", this.MemberOf.Name);
-			System.Console.WriteLine("Max Level: {0}", this.MaxLV);
-			System.Console.WriteLine("Growth Rate (0-31): {0}", this.GrowthRate);
-			System.Console.WriteLine("Base HP: {0}", this.BaseHP);
-			System.Console.WriteLine("Base MP: {0}", this.BaseMP);
-			System.Console.WriteLine("Base Attack: {0}", this.BaseATK);
-			System.Console.WriteLine("Base Defense: {0}", this.BaseDEF);
-			System.Console.WriteLine("Base Agility: {0}", this.BaseAGL);
-			System.Console.WriteLine("Base Intelligence: {0}", this.BaseINT);
-			System.Console.WriteLine("Learned Skills: ");
-			foreach(String thisLine in Skill.OutputMultiple(LearnedSkills))
+			List<String> ret = new List<String>();
+			ret.Add(String.Format("Monster: {0}", this.Name));
+			ret.Add(String.Format("Family: {0}", this.MemberOf.Name));
+			ret.Add(String.Format("Max Level: {0}", this.MaxLV));
+			ret.Add(String.Format("Growth Rate (0-31): {0}", this.GrowthRate));
+			ret.Add(String.Format("Base HP: {0}", this.BaseHP));
+			ret.Add(String.Format("Base MP: {0}", this.BaseMP));
+			ret.Add(String.Format("Base Attack: {0}", this.BaseATK));
+			ret.Add(String.Format("Base Defense: {0}", this.BaseDEF));
+			ret.Add(String.Format("Base Agility: {0}", this.BaseAGL));
+			ret.Add(String.Format("Base Intelligence: {0}", this.BaseINT));
+			ret.Add(String.Format("Learned Skills: "));
+			foreach(String thisLine in OutputData<Skill>.OutputMultiple(LearnedSkills))
 			{
-				System.Console.WriteLine("\t{0}", thisLine);
+				ret.Add(String.Format("\t{0}", thisLine));
 			}
+
+			return ret;
+		}
+
+		public String OutputMultipleHeader()
+		{
+			return String.Format
+				(
+					"{0,9} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {8,3} {9,3} {10,3} {11,31}", 
+					"Monster", 
+					"Family", 
+					"MaxLV", 
+					"GR", 
+					"HP", 
+					"MP", 
+					"ATK", 
+					"DEF", 
+					"AGL", 
+					"INT", 
+					"Learned Skills"
+				);
+		}
+
+		public String OutputMultipleLine()
+		{
+			return String.Format
+				(
+					"{0,9} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {8,3} {9,3} {10,3} {11,31}", 
+					this.Name, 
+					this.MemberOf.Name, 
+					this.MaxLV, 
+					this.GrowthRate, 
+					this.BaseHP, 
+					this.BaseMP, 
+					this.BaseATK, 
+					this.BaseDEF, 
+					this.BaseAGL, 
+					this.BaseINT, 
+					String.Join(", ", this.LearnedSkills.Select(x => x.Name).ToList())
+				);
 		}
 	}
 }

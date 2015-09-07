@@ -3,9 +3,12 @@ using System.Collections.Generic;
 
 namespace DQMInfo.Data
 {
-    public class Skill : IOutputable
+    public class Skill : IData
     {
         public String Name;
+
+		public String SearchName { get { return this.Name; } }
+
         public int MP;
         public int MinLV;
         public int MinHP;
@@ -71,62 +74,56 @@ namespace DQMInfo.Data
             return ret;
         }
 
-        public void Output()
+		public List<String> OutputSingle()
         {
-			System.Console.WriteLine("Skill: {0}", this.Name);
-			System.Console.WriteLine("MP Used: {0}", this.MP == -1 ? "ALL" : this.MP.ToString());
-			System.Console.WriteLine("Prerequisites to learn:");
-			System.Console.WriteLine("\tLevel Required: >{0}", this.MinLV);
-			System.Console.WriteLine("\tHP Required: >{0}", this.MinHP);
-			System.Console.WriteLine("\tAttack Required: >{0}", this.MinATK);
-			System.Console.WriteLine("\tDefense Required: >{0}", this.MinDEF);
-			System.Console.WriteLine("\tAgility Required: >{0}", this.MinAGL);
-			System.Console.WriteLine("\tIntelligence Required: >{0}", this.MinINT);
-			System.Console.WriteLine("Description:");
-			System.Console.WriteLine("\t{0}", this.Description);
-        }
-
-		public static List<String> OutputMultiple(List<Skill> outputList)
-		{
 			List<String> ret = new List<String>();
-			ret.Add
-				(
-					String.Format
-						(
-							"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
-							"SkillName",
-							"MP",
-							"LVL",
-							"HP",
-							"ATK",
-							"DEF",
-							"AGL",
-							"INT",
-							"Description"
-						)
-				);
-
-			foreach(var thisOutput in outputList)
-			{
-				ret.Add
-				(
-					String.Format
-					(
-						"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
-						thisOutput.Name,
-						thisOutput.MP == -1 ? "ALL" : thisOutput.MP.ToString(),
-						thisOutput.MinLV,
-						thisOutput.MinHP,
-						thisOutput.MinATK,
-						thisOutput.MinDEF,
-						thisOutput.MinAGL,
-						thisOutput.MinINT,
-						thisOutput.Description
-					)
-				);
-			}
+			ret.Add(String.Format("Skill: {0}", this.Name));
+			ret.Add(String.Format("MP Used: {0}", this.MP == -1 ? "ALL" : this.MP.ToString()));
+			ret.Add(String.Format("Prerequisites to learn:"));
+			ret.Add(String.Format("\tLevel Required: >{0}", this.MinLV));
+			ret.Add(String.Format("\tHP Required: >{0}", this.MinHP));
+			ret.Add(String.Format("\tAttack Required: >{0}", this.MinATK));
+			ret.Add(String.Format("\tDefense Required: >{0}", this.MinDEF));
+			ret.Add(String.Format("\tAgility Required: >{0}", this.MinAGL));
+			ret.Add(String.Format("\tIntelligence Required: >{0}", this.MinINT));
+			ret.Add(String.Format("Description:"));
+			ret.Add(String.Format("\t{0}", this.Description));
 
 			return ret;
+        }
+
+		public String OutputMultipleHeader()
+		{
+			return String.Format
+				(
+				"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
+				"SkillName",
+				"MP",
+				"LVL",
+				"HP",
+				"ATK",
+				"DEF",
+				"AGL",
+				"INT",
+				"Description"
+			);
+		}
+
+		public String OutputMultipleLine()
+		{
+			return String.Format
+				(
+				"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
+				this.Name,
+				this.MP == -1 ? "ALL" : this.MP.ToString(),
+				this.MinLV,
+				this.MinHP,
+				this.MinATK,
+				this.MinDEF,
+				this.MinAGL,
+				this.MinINT,
+				this.Description
+			);
 		}
     }
 }

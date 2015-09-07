@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DQMInfo.Data;
 using System.Linq;
 using DQMInfo.BreedTree;
+using DQMInfo.Output;
 
 namespace DQMInfo
 {
@@ -33,6 +34,7 @@ namespace DQMInfo
 				System.Console.WriteLine("Main Menu:");
 				System.Console.WriteLine(" 1. Search for Monster");
 				System.Console.WriteLine(" 2. Search for Skill");
+				System.Console.WriteLine(" 3. Search for Key");
 				System.Console.WriteLine(" 0. Exit");
 				System.Console.WriteLine("Your Choice (Enter Number): ");
 				
@@ -44,7 +46,10 @@ namespace DQMInfo
 						MonsterMenu();
 						break;
 					case "2":
-						SkillMenu();
+						SearchMenu<Skill>(SkillList);
+						break;
+					case "3":
+						SearchMenu<Key>(KeyList);
 						break;
 					case "0":
 						Completed = true;
@@ -98,16 +103,19 @@ namespace DQMInfo
 					}
 				}
 
-				thisMonster.Output();
+				foreach(String thisLine in OutputData<Monster>.OutputSingle(thisMonster))
+				{
+					System.Console.WriteLine(thisLine);
+				}
 				System.Console.WriteLine("Breeding Information: ");
 				List<Breed> BreedingInformation = BreedList.AsQueryable().Where(x => x.Result == thisMonster).ToList();
 				if (BreedingInformation.Count == 0)
 					System.Console.WriteLine("\tNo Breed combinations found for {0}.", thisMonster.Name);
 				else
 				{
-					foreach(Breed thisBreed in BreedingInformation)
+					foreach(String thisLine in OutputData<Breed>.OutputMultiple(BreedingInformation))
 					{
-						System.Console.WriteLine("\t{0}", thisBreed.Output());
+						System.Console.WriteLine("\t{0}", thisLine);
 					}
 				}
 
@@ -131,28 +139,28 @@ namespace DQMInfo
 			}
 		}
 
-		public void SkillMenu()
+		public void SearchMenu<TData>(List<TData> TList) where TData : IData
 		{
 			System.Console.WriteLine();
-			System.Console.WriteLine("Type the name of the skill to search for: ");
-			string SkillName = System.Console.ReadLine();
-			IQueryable<Skill> BaseQuery = SkillList.AsQueryable().Where(x => x.Name.ToUpper().Contains(SkillName.ToUpper()));
+			System.Console.WriteLine("Type the name of the {0} to search for: ", typeof(TData).Name);
+			string Query = System.Console.ReadLine();
+			IQueryable<TData> BaseQuery = TList.AsQueryable().Where(x => x.SearchName.ToUpper().Contains(Query.ToUpper()));
 			if(!BaseQuery.Any())
 			{
-				System.Console.WriteLine("Skill \"{0}\" not found. ", SkillName);
+				System.Console.WriteLine("{0} \"{1}\" not found. ", typeof(TData).Name, Query);
 				return;
 			}
 			else
 			{
 				if (BaseQuery.ToList().Count > 1)
 				{
-					foreach (String thisLine in Skill.OutputMultiple(BaseQuery.ToList()))
+					foreach (String thisLine in OutputData<TData>.OutputMultiple(TList))
 					{
 						System.Console.WriteLine(thisLine);
 					}
 				}
 				else
-					BaseQuery.Single().Output();
+					OutputData<TData>.OutputSingle(BaseQuery.Single());
 			}
 
 			System.Console.WriteLine();

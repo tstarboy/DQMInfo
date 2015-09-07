@@ -4,9 +4,12 @@ using System.Linq;
 
 namespace DQMInfo.Data
 {
-	public class Key : IOutputable 
+	public class Key : IData 
 	{
 		public String Name;
+
+		public String SearchName { get { return this.Name; } }
+
 		public int Rarity;
 		public List<Family> MonsterTypes;
 
@@ -63,47 +66,29 @@ namespace DQMInfo.Data
 			return ret;
 		}
 
-		public void Output()
-		{
-			System.Console.WriteLine("Key: {0}", this.Name);
-			System.Console.WriteLine("Rarity: {0}/16", this.Rarity);
-			System.Console.WriteLine("Monster Families Found: ");
-			foreach(Family thisMonsterType in MonsterTypes)
-			{
-				System.Console.WriteLine("\t{0}", thisMonsterType.Name);
-			}
-			System.Console.ReadKey();
-		}
-
-		public static List<String> OutputMultiple(List<Key> outputList)
+		public List<String> OutputSingle()
 		{
 			List<String> ret = new List<String>();
-			ret.Add
-			(
-				String.Format
-				(
-					"{0,10} {1,6} {2}",
-					"Key",
-					"Rarity",
-					"Families"
-				)
-			);
 
-			foreach(var thisOutput in outputList)
+			ret.Add(String.Format("Key: {0}", this.Name));
+			ret.Add(String.Format("Rarity: {0}/16", this.Rarity));
+			ret.Add(String.Format("Monster Families Found: "));
+			foreach(Family thisMonsterType in MonsterTypes)
 			{
-				ret.Add
-				(
-					String.Format
-					(
-						"{0,10} {1,3}/16 {2}",
-						thisOutput.Name,
-						thisOutput.Rarity,
-						String.Join(", ", thisOutput.MonsterTypes.Select(i => i.Name).ToList())
-					)
-				);
+				ret.Add(String.Format("\t{0}", thisMonsterType.Name));
 			}
 
 			return ret;
+		}
+
+		public String OutputMultipleHeader()
+		{
+			return String.Format("{0,10} {1,6} {2}", "Key", "Rarity", "Families");
+		}
+
+		public String OutputMultipleLine()
+		{
+			return String.Format("{0,10} {1,3}/16 {2}", this.Name, this.Rarity, String.Join(", ", this.MonsterTypes.Select(i => i.Name).ToList()));
 		}
 	}
 }
