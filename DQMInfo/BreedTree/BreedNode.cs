@@ -25,12 +25,22 @@ namespace DQMInfo.BreedTree
 
 		public BreedNode(Monster startMonster, List<Breed> BreedList)
 		{
-			BreedNode result = BreedNodeInner(startMonster, BreedList, new List<Monster>(), new List<BreedNode>());
+			if(!BreedList.AsQueryable().Where(x => x.Result.Name.ToUpper() == startMonster.Name.ToUpper()).Any())
+			{
+				thisBreed = startMonster;
+				this.Parent1 = null;
+				this.Parent2 = null;
+				this.Cost = 10;
+			}
+			else
+			{
+				BreedNode result = BreedNodeInner(startMonster, BreedList, new List<Monster>(), new List<BreedNode>());
 
-			this.thisBreed = result.thisBreed;
-			this.Parent1 = result.Parent1;
-			this.Parent2 = result.Parent2;
-			this.Cost = result.Cost;
+				this.thisBreed = result.thisBreed;
+				this.Parent1 = result.Parent1;
+				this.Parent2 = result.Parent2;
+				this.Cost = result.Cost;
+			}
 		}
 
 		public BreedNode(IBreedable inThisBreed, BreedNode inParent1, BreedNode inParent2)

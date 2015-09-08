@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DQMInfo.Data
 {
-    public class Skill : IData
+	public class Skill : IData
     {
         public String Name;
 
@@ -17,6 +18,7 @@ namespace DQMInfo.Data
         public int MinAGL;
         public int MinINT;
         public String Description;
+		public List<Monster> MonstersThatLearn;
 
         public Skill()
         {
@@ -74,6 +76,15 @@ namespace DQMInfo.Data
             return ret;
         }
 
+		public static List<Skill> AddMonsterList(List<Skill> SkillList, List<Monster> MonsterList)
+		{
+			for(int i = 0; i < SkillList.Count; i++)
+			{
+				SkillList[i].MonstersThatLearn = MonsterList.AsQueryable().Where(x => x.LearnedSkills.Select(y => y.Name).Contains(SkillList[i].Name)).ToList();
+			}
+			return SkillList;
+		}
+
 		public List<String> OutputSingle()
         {
 			List<String> ret = new List<String>();
@@ -88,6 +99,11 @@ namespace DQMInfo.Data
 			ret.Add(String.Format("\tIntelligence Required: >{0}", this.MinINT));
 			ret.Add(String.Format("Description:"));
 			ret.Add(String.Format("\t{0}", this.Description));
+			ret.Add(String.Format("Monsters that learn {0}:", this.Name));
+			foreach(Monster thisMonster in MonstersThatLearn)
+			{
+				ret.Add(String.Format("\t{0}", thisMonster.Name));
+			}
 
 			return ret;
         }
@@ -96,34 +112,34 @@ namespace DQMInfo.Data
 		{
 			return String.Format
 				(
-				"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
-				"SkillName",
-				"MP",
-				"LVL",
-				"HP",
-				"ATK",
-				"DEF",
-				"AGL",
-				"INT",
-				"Description"
-			);
+					"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8, -55}",
+					"SkillName",
+					"MP",
+					"LVL",
+					"HP",
+					"ATK",
+					"DEF",
+					"AGL",
+					"INT",
+					"Description"
+				);
 		}
 
 		public String OutputMultipleLine()
 		{
 			return String.Format
 				(
-				"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8}",
-				this.Name,
-				this.MP == -1 ? "ALL" : this.MP.ToString(),
-				this.MinLV,
-				this.MinHP,
-				this.MinATK,
-				this.MinDEF,
-				this.MinAGL,
-				this.MinINT,
-				this.Description
-			);
+					"{0,9} {1,3} {2,3} {3,3} {4,3} {5,3} {6,3} {7,3} {8, -55}",
+					this.Name,
+					this.MP == -1 ? "ALL" : this.MP.ToString(),
+					this.MinLV,
+					this.MinHP,
+					this.MinATK,
+					this.MinDEF,
+					this.MinAGL,
+					this.MinINT,
+					this.Description
+				);
 		}
     }
 }

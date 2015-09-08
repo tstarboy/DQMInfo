@@ -24,6 +24,9 @@ namespace DQMInfo.Data
 		public int BaseINT;
 		public List<Skill> LearnedSkills;
 
+		public List<Breed> Parents;
+		public List<Breed> Children;
+
 		public bool isFinal { get { return false; } }
 
 		public Monster()
@@ -95,6 +98,22 @@ namespace DQMInfo.Data
 			return ret;
 		}
 
+		public static List<Monster> AddBreedList(List<Monster> MonsterList, List<Breed> BreedList)
+		{
+			for(int i = 0; i < MonsterList.Count; i++)
+			{
+				List<Breed> theseChildren = new List<Breed>();
+				MonsterList[i].Parents = BreedList.AsQueryable().Where(x => x.Result.Name == MonsterList[i].Name).ToList();
+				foreach (Breed thisBreed in BreedList.AsQueryable().Where(x => x.Parent1.BreedName == MonsterList[i].Name || x.Parent2.BreedName == MonsterList[i].Name))
+				{
+					theseChildren.Add(thisBreed);
+				}
+				MonsterList[i].Children = theseChildren;
+			}
+
+			return MonsterList;
+		}
+
 		public List<String> OutputSingle()
 		{
 			List<String> ret = new List<String>();
@@ -108,12 +127,25 @@ namespace DQMInfo.Data
 			ret.Add(String.Format("Base Defense: {0}", this.BaseDEF));
 			ret.Add(String.Format("Base Agility: {0}", this.BaseAGL));
 			ret.Add(String.Format("Base Intelligence: {0}", this.BaseINT));
+
 			ret.Add(String.Format("Learned Skills: "));
 			foreach(String thisLine in OutputData<Skill>.OutputMultiple(LearnedSkills))
-			{
 				ret.Add(String.Format("\t{0}", thisLine));
+
+			if(Parents.Count > 0)
+			{
+				ret.Add(String.Format("Breed combinations resulting in {0}:", this.Name));
+				foreach (String thisLine in OutputData<Breed>.OutputMultiple(Parents))
+					ret.Add(String.Format("\t{0}", thisLine));
 			}
 
+			if(Children.Count > 0)
+			{
+				ret.Add(String.Format("Breed combinations using {0} as a parent:", this.Name));
+				foreach (String thisLine in OutputData<Breed>.OutputMultiple(Children))
+					ret.Add(String.Format("\t{0}", thisLine));
+			}
+				
 			return ret;
 		}
 
@@ -121,7 +153,7 @@ namespace DQMInfo.Data
 		{
 			return String.Format
 				(
-					"{0,9} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {8,3} {9,3} {10,3} {11,31}", 
+					"{0,10} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {7,3} {8,3} {9,3} {10,31}", 
 					"Monster", 
 					"Family", 
 					"MaxLV", 
@@ -140,7 +172,7 @@ namespace DQMInfo.Data
 		{
 			return String.Format
 				(
-					"{0,9} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {8,3} {9,3} {10,3} {11,31}", 
+					"{0,10} {1,11} {2,5} {3,2} {4,3} {5,3} {6,3} {7,3} {8,3} {9,3} {10,31}", 
 					this.Name, 
 					this.MemberOf.Name, 
 					this.MaxLV, 

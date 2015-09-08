@@ -15,7 +15,6 @@ namespace DQMInfo.Output
 		{
 			List<String> ret = new List<String>();
 			ret.Add(outputList[0].OutputMultipleHeader());
-
 			foreach(TData thisDataLine in outputList)
 			{
 				ret.Add(thisDataLine.OutputMultipleLine());
