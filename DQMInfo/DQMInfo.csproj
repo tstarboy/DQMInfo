@@ -50,28 +50,28 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Information\" />
     <Folder Include="Data\" />
     <Folder Include="BreedTree\" />
     <Folder Include="Output\" />
+    <Folder Include="CSV\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Information\skills.csv">
+    <None Include="CSV\skills.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Information\monsters.csv">
+    <None Include="CSV\monsters.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Information\families.csv">
+    <None Include="CSV\families.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Information\keyprefix.csv">
+    <None Include="CSV\keyprefix.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Information\keysuffix.csv">
+    <None Include="CSV\keysuffix.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Information\breeding.csv">
+    <None Include="CSV\breeding.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

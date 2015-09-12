@@ -18,18 +18,18 @@ namespace DQMInfo
 
 		public Processor()
 		{
-			SkillList = Skill.BuildSkillList(CSVParser.ParseCSV(@"Information/skills.csv"));
+			SkillList = Skill.BuildSkillList(CSVParser.ParseCSV(@"CSV/skills.csv"));
 
-			FamilyList = Family.BuildFamilyList(CSVParser.ParseCSV(@"Information/families.csv"));
+			FamilyList = Family.BuildFamilyList(CSVParser.ParseCSV(@"CSV/families.csv"));
 
-			MonsterList = Monster.BuildMonsterList(CSVParser.ParseCSV(@"Information/monsters.csv"), SkillList, FamilyList);
+			MonsterList = Monster.BuildMonsterList(CSVParser.ParseCSV(@"CSV/monsters.csv"), SkillList, FamilyList);
 			SkillList = Skill.AddMonsterList(SkillList, MonsterList);
 
-			BreedList = Breed.BuildBreedList(CSVParser.ParseCSV(@"Information/breeding.csv"), MonsterList, FamilyList);
+			BreedList = Breed.BuildBreedList(CSVParser.ParseCSV(@"CSV/breeding.csv"), MonsterList, FamilyList);
 			BreedList.RemoveAll(x => x.Result.Name == "WonderEgg" || x.Parent1.BreedName == "WonderEgg" || x.Parent2.BreedName == "WonderEgg");
 			MonsterList = Monster.AddBreedList(MonsterList, BreedList);
 
-			KeyList = Key.BuildKeyList(CSVParser.ParseCSV(@"Information/keyprefix.csv"), CSVParser.ParseCSV(@"Information/keysuffix.csv"), FamilyList);
+			KeyList = Key.BuildKeyList(CSVParser.ParseCSV(@"CSV/keyprefix.csv"), CSVParser.ParseCSV(@"Information/keysuffix.csv"), FamilyList);
 		}
 
 		public void MainMenu()

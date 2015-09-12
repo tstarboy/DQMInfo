@@ -88,6 +88,11 @@ namespace DQMInfo.BreedTree
 						BreedNodeInner(PotentialBreeds[0].Parent1, BreedList, UsedMonsters, PartialPaths),
 						BreedNodeInner(PotentialBreeds[0].Parent2, BreedList, UsedMonsters, PartialPaths)
 				    );
+
+				if(PotentialBreeds[0].RequiredDepth.HasValue)
+				{
+					thisBreedNode.Cost = Math.Max(thisBreedNode.Cost, PotentialBreeds[0].RequiredDepth.Value);
+				}
 						
 				UsedMonsters.Remove((Monster)inputResult); //Remove the current monster from the used monsters list
 
@@ -105,6 +110,11 @@ namespace DQMInfo.BreedTree
 						BreedNodeInner(thisBreed.Parent1, BreedList, UsedMonsters, PartialPaths),
 						BreedNodeInner(thisBreed.Parent2, BreedList, UsedMonsters, PartialPaths)
 					);
+
+				if(thisBreed.RequiredDepth.HasValue)
+				{
+					tempAdd.Cost = Math.Max(tempAdd.Cost, thisBreed.RequiredDepth.Value);
+				}
 
 				if(tempAdd.Cost > 0) PotentialReturn.Add(tempAdd);
 			}
